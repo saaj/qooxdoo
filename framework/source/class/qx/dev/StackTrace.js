@@ -208,6 +208,7 @@ qx.Bootstrap.define("qx.dev.StackTrace",
           lineNumber,
           columnNumber,
           fileName,
+          functionName,
           url;
 
       var traceProp = qx.dev.StackTrace.hasEnvironmentCheck ?
@@ -217,16 +218,18 @@ qx.Bootstrap.define("qx.dev.StackTrace",
         if (!error.stack) {
           return trace;
         }
-        // Gecko style, e.g. "()@http://localhost:8080/webcomponent-test-SNAPSHOT/webcomponent/js/com/ptvag/webcomponent/common/log/Logger:253"
-        lineRe = /@(.+):(\d+)$/gm;
+        // Gecko style, e.g. "()@http://localhost:8080/webcomponent-test-SNAPSHOT/webcomponent/js/com/ptvag/webcomponent/common/log/Logger:253:12"
+        lineRe = /\s*([^@]+)@(.+):(\d+):(\d+)$/gm;
 
         while ((hit = lineRe.exec(error.stack)) != null)
         {
-          url = hit[1];
-          lineNumber = hit[2];
+          url = hit[2];
+          lineNumber = hit[3];
+          columnNumber = hit[4];
+          functionName = hit[1];
 
           className = this.__fileNameToClassName(url);
-          trace.push(className + ":" + lineNumber);
+          trace.push(className + ":" + functionName +  ":" + lineNumber + ":" + columnNumber);
         }
 
         if (trace.length > 0) {
